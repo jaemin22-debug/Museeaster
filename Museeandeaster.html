@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Literature Quiz</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f7f6; }
+        .header { text-align: center; padding: 20px; background: #2c3e50; color: white; border-radius: 8px; margin-bottom: 30px; }
+        .question-card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .question-text { font-weight: bold; font-size: 1.1em; margin-bottom: 15px; color: #2c3e50; }
+        .options { list-style-type: none; padding: 0; }
+        .option { padding: 12px 15px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; transition: all 0.2s; }
+        .option:hover { background-color: #f8f9fa; border-color: #adb5bd; }
+        .option.selected { background-color: #e9ecef; border-color: #6c757d; font-weight: bold; }
+        #submit-btn { display: block; width: 100%; padding: 15px; background: #2c3e50; color: white; border: none; border-radius: 8px; font-size: 1.2em; cursor: pointer; margin-top: 20px; }
+        #submit-btn:hover { background: #34495e; }
+        #result-area { display: none; text-align: center; padding: 30px; background: #fff; border-radius: 8px; margin-top: 20px; border: 2px solid #2c3e50; }
+        .score-display { font-size: 2em; font-weight: bold; color: #2c3e50; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>English Poetry Masterpieces Quiz</h1>
+    <p>Auden | Browning | Herbert</p>
+</div>
+
+<div id="quiz-container"></div>
+
+<button id="submit-btn" onclick="showResult()">Submit All Answers</button>
+
+<div id="result-area">
+    <h2>Quiz Completed!</h2>
+    <p>Your Final Score:</p>
+    <div class="score-display" id="score-text"></div>
+</div>
+
+<script>
+const quizData = [
+    {
+        q: "In Auden's 'Musée des Beaux Arts', line 3 reads: 'Its human position; how it takes place / While someone else is eating...'. What does the pronoun 'its' refer to? ",
+        options: ["The Old Masters", "The painting", "The miraculous birth", "Suffering"],
+        correct: 3 // D
+    },
+    {
+        q: "In the second stanza of 'Musée des Beaux Arts', who is the 'boy falling out of the sky' mentioned in line 20? [cite: 17, 21]",
+        options: ["Daedalus", "The ploughman", "Icarus", "The torturer's horse"],
+        correct: 2 // C
+    },
+    {
+        q: "Which word best captures the central theme of 'Musée des Beaux Arts' regarding the world's reaction to individual tragedy? [cite: 17, 21, 36]",
+        options: ["Indignation", "Apathy", "Empathy", "Reverence"],
+        correct: 1 // B
+    },
+    {
+        q: "In 'My Last Duchess', the Duke says: 'E’en then would be some _____; and I choose / Never to _____.' Which word fills both blanks? ",
+        options: ["Yield", "Bending", "Falter", "Stoop"],
+        correct: 3 // D
+    },
+    {
+        q: "At the end of 'My Last Duchess', the Duke points out a statue of 'Neptune, though, / _____ a sea-horse'. [cite: 77]",
+        options: ["Taming", "Killing", "Riding", "Guiding"],
+        correct: 0 // A
+    },
+    {
+        q: "In 'My Last Duchess', line 10 states: 'since none puts by / The curtain I have drawn for you, but I'. What is the grammatical function of 'but' here? ",
+        options: ["A relative pronoun", "A conjunction meaning 'however'", "A preposition meaning 'except'", "An adverb meaning 'only'"],
+        correct: 2 // C
+    },
+    {
+        q: "The Duke complains about the '_____ fool' who broke a bough of cherries for the Duchess. ",
+        options: ["Innocent", "Arrogant", "Generous", "Officious"],
+        correct: 3 // D
+    },
+    {
+        q: "In George Herbert's 'Easter Wings', the line 'For, if I imp my wing on thine' uses a term from which specialized field? [cite: 103]",
+        options: ["Falconry", "Navigation", "Architecture", "Agriculture"],
+        correct: 0 // A
+    },
+    {
+        q: "Herbert writes, 'Then shall the fall further the flight in me.' This paradox is closely related to which concept? [cite: 102]",
+        options: ["Predestination", "Fortunate Fall (Felix Culpa)", "Divine Right", "Original Sin"],
+        correct: 1 // B
+    },
+    {
+        q: "What is the most striking visual 'figure of speech' or literary device used in George Herbert's 'Easter Wings'? [cite: 94]",
+        options: ["Onomatopoeia", "Alliteration", "Shape Poem (Pattern Poetry)", "Iambic Pentameter"],
+        correct: 2 // C
+    },
+    {
+        q: "In the first stanza of 'Easter Wings', the speaker asks to rise like which bird? [cite: 101]",
+        options: ["Doves", "Falcons", "Eagles", "Larks"],
+        correct: 3 // D
+    },
+    {
+        q: "Regarding the tone of 'My Last Duchess', how does the Duke view his own 'skill in speech' (line 36)? ",
+        options: ["He claims he lacks skill", "He is proud of his eloquence", "He finds it meddlesome", "He believes it is his greatest weapon"],
+        correct: 0 // A
+    }
+];
+
+let userAnswers = Array(quizData.length).fill(null);
+
+function loadQuiz() {
+    const container = document.getElementById('quiz-container');
+    quizData.forEach((data, qIdx) => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        
+        let optionsHtml = '';
+        data.options.forEach((opt, optIdx) => {
+            optionsHtml += `<li class="option" data-q="${qIdx}" data-opt="${optIdx}" onclick="selectOption(this)">${opt}</li>`;
+        });
+
+        card.innerHTML = `
+            <div class="question-text">${qIdx + 1}. ${data.q}</div>
+            <ul class="options">${optionsHtml}</ul>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function selectOption(element) {
+    const qIdx = element.getAttribute('data-q');
+    const optIdx = parseInt(element.getAttribute('data-opt'));
+    
+    // UI Change
+    const parent = element.parentElement;
+    parent.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+    element.classList.add('selected');
+    
+    // Save Answer
+    userAnswers[qIdx] = optIdx;
+}
+
+function showResult() {
+    let score = 0;
+    let unanswered = false;
+
+    userAnswers.forEach((ans, idx) => {
+        if (ans === null) unanswered = true;
+        if (ans === quizData[idx].correct) score++;
+    });
+
+    if (unanswered && !confirm("You have unanswered questions. Submit anyway?")) {
+        return;
+    }
+
+    document.getElementById('quiz-container').style.display = 'none';
+    document.getElementById('submit-btn').style.display = 'none';
+    
+    const resultArea = document.getElementById('result-area');
+    resultArea.style.display = 'block';
+    document.getElementById('score-text').innerText = `${score} / ${quizData.length}`;
+}
+
+loadQuiz();
+</script>
+
+</body>
+</html>
